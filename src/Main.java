@@ -20,6 +20,16 @@ class Main {
         //TODO
     }
 
+    public static String replaceComplements(String binary1, String binary2) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < binary1.length(); i++)
+            if (binary1.charAt(i) != binary2.charAt(i))
+                result.append("-");
+            else
+                result.append(binary1.charAt(i));
+        return String.valueOf(result);
+    }
+
     public static boolean isGrey(String binary1, String binary2) {
         int count = 0;
         for (int i = 0; i < binary1.length(); i++)
