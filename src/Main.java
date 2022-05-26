@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Scanner;
 
 class Main {
-    private static int numberOfVariables;
+    private static int numberOfVariables = 4; //default value for testing
 
     public static void main(String[] args) {
         //scan the input data
@@ -60,5 +60,18 @@ class Main {
         for (int i = 0; i < numberOfVariables - firstLength; i++)
             bin.insert(0, "0");
         return String.valueOf(bin);
+    }
+
+    //returns the minterm. For example:
+    //getMinterm("101")  returns  "AB'C"
+    public static String getMinterm(String binary) {
+        List<String> letters = getVars();
+        StringBuilder minterm = new StringBuilder();
+        for (int i = 0; i < binary.length(); i++) {
+            minterm.append(letters.get(i));
+            if (binary.charAt(i) == '0')
+                minterm.append("'");
+        }
+        return String.valueOf(minterm);
     }
 }
