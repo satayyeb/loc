@@ -20,6 +20,14 @@ class Main {
         //TODO
     }
 
+    public static boolean isGrey(String binary1, String binary2) {
+        int count = 0;
+        for (int i = 0; i < binary1.length(); i++)
+            if (binary1.charAt(i) != binary2.charAt(i))
+                count++;
+        return (count == 1);
+    }
+
     public static String getBinary(int mintermNumber) {
         StringBuilder bin = new StringBuilder();
         bin.append(Integer.toBinaryString(mintermNumber));
