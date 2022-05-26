@@ -1,5 +1,31 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 class Main {
+    private static int numberOfVariables;
+
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        //scan the input data
+        Scanner scanner = new Scanner(System.in);
+        numberOfVariables = Integer.parseInt(scanner.nextLine());
+        String inputString = scanner.nextLine();
+
+        //extract numbers form input data
+        List<Integer> mintermNumbers = new ArrayList<>();
+        for (String string : inputString.split(","))
+            mintermNumbers.add(Integer.parseInt(string));
+
+        //start the algorithm
+        //TODO
+    }
+
+    public static String getBinary(int mintermNumber) {
+        StringBuilder bin = new StringBuilder();
+        bin.append(Integer.toBinaryString(mintermNumber));
+        int firstLength = bin.length();
+        for (int i = 0; i < numberOfVariables - firstLength; i++)
+            bin.insert(0, "0");
+        return String.valueOf(bin);
     }
 }
