@@ -30,68 +30,160 @@ class Main {
         //loop over the main algorithm
         while (!algorithm(mintermBinaries).containsAll(mintermBinaries))
             mintermBinaries = algorithm(mintermBinaries);
-        while (true){
-            int size = mintermBinaries.size();
-            mintermBinaries = simplifymore(mintermBinaries);
-            if (mintermBinaries.size() == size) break;
-        }
-        //convert from binary to letter form
+
+        mintermBinaries = simplifymore(mintermBinaries);
+
         List<String> minterms = new ArrayList<>();
         for (String binary : mintermBinaries)
             minterms.add(getMinterm(binary));
         return minterms;
     }
-    private static ArrayList<String> simplifymore(List<String> mintermBinaries){
-        ArrayList<ArrayList<Integer>> minterms= new ArrayList<>();
-        ArrayList<String> finals= new ArrayList<>();
+
+    private static Set<ArrayList<Integer>> getEssentials(HashSet<Integer> mins, Set<ArrayList<Integer>> binaries) {
+        Set<ArrayList<Integer>> res = new HashSet<>();
+        for (Integer min : mins) {
+            int count = 0;
+            for (ArrayList<Integer> binary : binaries) {
+                if (binary.contains(min)) count++;
+            }
+            if (count == 1) {
+                for (ArrayList<Integer> binary : binaries) {
+                    if (binary.contains(min)) res.add(binary);
+                }
+            }
+        }
+        return res;
+    }
+
+    private static void removeEssentials(HashSet<Integer> mins, ArrayList<ArrayList<Integer>> binaries, ArrayList<ArrayList<Integer>> essentials) {
+        for (ArrayList<Integer> essential : essentials) {
+            for (Integer integer : essential) {
+                if (mins.contains(integer)) mins.remove(integer);
+            }
+        }
+
+        binaries.removeAll(essentials);
+    }
+
+
+    private static ArrayList<String> simplifymore(List<String> mintermBinaries) {
+        ArrayList<ArrayList<Integer>> minterms = new ArrayList<>();
+        Set<ArrayList<Integer>> mintersIntegerSet = new HashSet<>();
+
         for (String mintermBinary : mintermBinaries) {
             ArrayList<Integer> thisBinaryMinterms = getBinaryMinterms(mintermBinary);
             minterms.add(thisBinaryMinterms);
         }
-        int repetitive = -1;
-        for (int i =0; i < minterms.size(); i++) {
-            if (getAllnumbers(minterms, i).containsAll(minterms.get(i))){
-                repetitive = i;
+
+        mintersIntegerSet.addAll(minterms);
+        HashSet<Integer> neededMintermsUniqe = getNonRepetitiveMinterNumbers(minterms);
+        Set<ArrayList<Integer>> essentialTerms = getEssentials(neededMintermsUniqe, mintersIntegerSet);
+        // remove essentials
+        mintersIntegerSet.removeAll(essentialTerms);
+        Set<Set<ArrayList<Integer>>> all_possible_sets = powerSet(mintersIntegerSet);
+
+        Set<ArrayList<Integer>> bestAns = new HashSet<>();
+        for (Set<ArrayList<Integer>> all_possible_set : all_possible_sets) {
+            HashSet<ArrayList<Integer>> a = new HashSet<>();
+            a.addAll(all_possible_set);
+            a.addAll(essentialTerms);
+            if (isValid(a, neededMintermsUniqe)) {
+                if (all_possible_set.size() < bestAns.size() || bestAns.size() == 0) {
+                    bestAns = all_possible_set;
+                }
             }
         }
-        if (repetitive == -1) return new ArrayList<>(mintermBinaries);
-        mintermBinaries.remove(repetitive);
-        return new ArrayList<>(mintermBinaries);
+        bestAns.addAll(essentialTerms);
+        ArrayList<String> ansStr = new ArrayList<>();
+        for (ArrayList<Integer> bestAn : bestAns) {
+            for (String mintermBinary : mintermBinaries) {
+                if (getBinaryMinterms(mintermBinary).containsAll(bestAn)) {
+                    ansStr.add(mintermBinary);
+                }
+            }
+        }
+        return ansStr;
+
     }
 
-    private static ArrayList<Integer> getAllnumbers(ArrayList<ArrayList<Integer>> a, int not){
+    private static boolean isValid(Set<ArrayList<Integer>> terms, Set<Integer> neededMinters) {
+        for (Integer neededMinter : neededMinters) {
+            boolean has = false;
+            for (ArrayList<Integer> term : terms) {
+                if (term.contains(neededMinter)) {
+                    has = true;
+                    break;
+                }
+            }
+            if (has == false) return false;
+        }
+        return true;
+    }
+
+    public static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
+        Set<Set<T>> sets = new HashSet<Set<T>>();
+        if (originalSet.isEmpty()) {
+            sets.add(new HashSet<T>());
+            return sets;
+        }
+        List<T> list = new ArrayList<T>(originalSet);
+        T head = list.get(0);
+        Set<T> rest = new HashSet<T>(list.subList(1, list.size()));
+        for (Set<T> set : powerSet(rest)) {
+            Set<T> newSet = new HashSet<T>();
+            newSet.add(head);
+            newSet.addAll(set);
+            sets.add(newSet);
+            sets.add(set);
+        }
+        return sets;
+    }
+
+    private static HashSet<Integer> getNonRepetitiveMinterNumbers(ArrayList<ArrayList<Integer>> minterms) {
+        HashSet a = new HashSet();
+        for (ArrayList<Integer> minterm : minterms) {
+            a.addAll(minterm);
+        }
+        return a;
+    }
+
+    private static ArrayList<Integer> getAllnumbers(ArrayList<ArrayList<Integer>> a, int not) {
         ArrayList<Integer> res = new ArrayList<>();
         for (int i = 0; i < a.size(); i++) {
-            if (i == not ) continue;
+            if (i == not) continue;
             res.addAll(a.get(i));
         }
         return res;
     }
-    private static ArrayList<Integer> getBinaryMinterms(String binary){
-        ArrayList<Integer> minterms= new ArrayList<>();
+
+
+    private static ArrayList<Integer> getBinaryMinterms(String binary) {
+        ArrayList<Integer> minterms = new ArrayList<>();
         minterms.add(0);
-        for (int i = 0; i < binary.length(); i++){
-            char c = binary.charAt(binary.length()-1-i);
+        for (int i = 0; i < binary.length(); i++) {
+            char c = binary.charAt(binary.length() - 1 - i);
             if (c == '1') {
                 for (int i1 = 0; i1 < minterms.size(); i1++) {
-                    minterms.set(i1, minterms.get(i1)+ (1 << i));
+                    minterms.set(i1, minterms.get(i1) + (1 << i));
                 }
             }
-            if ( c == '-'){
+            if (c == '-') {
                 ArrayList<Integer> p = new ArrayList<>(minterms);
                 for (int i1 = 0; i1 < minterms.size(); i1++) {
-                    minterms.set(i1, minterms.get(i1)+ (1 << i));
+                    minterms.set(i1, minterms.get(i1) + (1 << i));
                 }
                 minterms.addAll(p);
             }
         }
         return minterms;
     }
+
     //The main algorithm
     private static List<String> algorithm(List<String> mintermBinaries) {
         List<String> newMinterms = new ArrayList<>();
         int size = mintermBinaries.size();
         boolean[] selected = new boolean[size];
+
         //find all Grey Codes
         for (int i = 0; i < size; i++) {
             for (int j = i + 1; j < size; j++) {
@@ -103,6 +195,7 @@ class Main {
                 }
             }
         }
+
         //add all not selected minterms
         for (int i = 0; i < size; i++)
             if (!selected[i])
