@@ -22,11 +22,13 @@ public class Main {
             } else if (command.startsWith("Join_request_for")) {
 //                joinRequest(commandParts);
             } else if (command.startsWith("Number_of_levels")) {
-//                numberOfLevels();
+                //numberOfLevels
+                System.out.println(Chain.getTables().size());
             } else if (command.startsWith("Number_of_users")) {
-//                numberOfUsers();
+                //numberOfUsers
+                System.out.println(Chain.getUsers().size());
             } else if (command.startsWith("Number_of_users_in_level")) {
-//                usersInLevel(commandParts);
+                usersInLevel(commandParts);
             } else if (command.startsWith("Introducer_of")) {
                 introducerOf(commandParts);
             } else if (command.startsWith("Friends_of")) {
@@ -38,6 +40,15 @@ public class Main {
             } else if (command.startsWith("How_much_have_we_made_yet")) {
 //                MahdizMoneyMade();
             }
+        }
+    }
+
+    private static void usersInLevel(String[] commandParts) {
+        int level = Integer.parseInt(commandParts[0]);
+        try {
+            System.out.println(Chain.getTables().get(level).getUsers().size());
+        } catch (Exception e) {
+            System.out.println("No_such_level_found");
         }
     }
 
