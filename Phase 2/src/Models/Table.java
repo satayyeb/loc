@@ -32,5 +32,9 @@ public class Table {
     public boolean isFull(){
         return (users.size() >= capacity);
     }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
 }
 

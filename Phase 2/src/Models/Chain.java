@@ -48,6 +48,7 @@ public class Chain {
         }
         return true;
     }
+
     public static User getUserByUsername(String username){
         for (User user : users) {
             if (user.getUsername().equals(username)) return user;
@@ -60,6 +61,24 @@ public class Chain {
     }
 
     public static Table getFirstNotFullTableAfterUser(User inviter) {
-        return null;
+        int i = tables.indexOf(inviter.getTable());
+        for (int j = i+1; j < tables.size(); j++) {
+            Table table = tables.get(j);
+            if (!table.isFull()){
+                return table;
+            }
+        }
+
+        Table table = new Table(tables.size());
+        tables.add(table);
+        return table;
+    }
+
+    public static void levelUpUser(User user) {
+        // FIXME: 6/6/2022 may cause error
+        Table upTable = tables.get(tables.indexOf(user.getTable()) -1);
+        if (!upTable.isFull()){
+            upTable.addUser(user);
+        }
     }
 }
