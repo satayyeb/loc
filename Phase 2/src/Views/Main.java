@@ -36,11 +36,28 @@ public class Main {
             } else if (command.startsWith("Credit_of")) {
                 creditOf(commandParts);
             } else if (command.startsWith("Users_on_the_same_level_with")) {
-//                usersOnSameLevelWith(commandParts);
+                usersOnSameLevelWith(commandParts);
             } else if (command.startsWith("How_much_have_we_made_yet")) {
-//                MahdizMoneyMade();
+                System.out.println(Chain.getMahdizMoney());
             }
         }
+    }
+
+    private static void usersOnSameLevelWith(String[] commandParts) {
+        for (User user : Chain.getUsers()) {
+            if (user.getUsername().equals(commandParts[0])) {
+                ArrayList<User> list = user.getTable().getUsers();
+                if (list.size() == 1)
+                    System.out.println("He_is_all_by_himself");
+                else
+                    for (User member : list)
+                        if (!member.equals(user))
+                            System.out.print(member.getUsername() + " ");
+                System.out.println();
+                return;
+            }
+        }
+        System.out.println("No_such_user_found");
     }
 
     private static void usersInLevel(String[] commandParts) {
@@ -67,13 +84,14 @@ public class Main {
                     for (int i = 0; i < users.size(); i++) {
                         if (users.get(i).equals(user)) {
                             try {
-                                System.out.println(users.get(i - 1) + " ");
+                                System.out.print(users.get(i - 1) + " ");
                             } catch (Exception ignored) {
                             }
                             try {
-                                System.out.println(users.get(i + 1));
+                                System.out.print(users.get(i + 1));
                             } catch (Exception ignored) {
                             }
+                            System.out.println();
                         }
                     }
                 }
