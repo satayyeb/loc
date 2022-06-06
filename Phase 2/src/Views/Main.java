@@ -20,7 +20,7 @@ public class Main {
             } else if (command.startsWith("Invitation_request_from")) {
                 invitationRequest(commandParts);
             } else if (command.startsWith("Join_request_for")) {
-//                joinRequest(commandParts);
+                joinRequest(commandParts);
             } else if (command.startsWith("Number_of_levels")) {
                 //numberOfLevels
                 System.out.println(Chain.getTables().size());
@@ -181,5 +181,34 @@ public class Main {
         Chain.setChainFounder(founder);
         table.getUsers().add(founder);
         System.out.println("You now own a table");
+    }
+
+    private static void joinRequest(String[] commandParts) {
+        String username = commandParts[1];
+        if (Chain.isUsernameFree(username)) {
+            double deposit = Double.parseDouble(commandParts[3]);
+            User user = new User(username, deposit * 0.15, null);
+            Chain.addMoneyToMahdiz(deposit * 0.25);
+            Chain.getChainFounder().addMoney(deposit * 0.1);
+            Table table = new Table(Chain.getTables().size());
+            table.addUser(user);
+            Chain.getTables().add(table);
+            ArrayList<Table> tables = Chain.getTables();
+            deposit *= 0.5;
+            addMoneyToUsers(deposit, table, tables);
+            System.out.println("User added successfully in level " + tables.size());
+        }
+        else
+            System.out.println("Username already taken");
+    }
+
+    private static void addMoneyToUsers(double deposit, Table table, ArrayList<Table> tables) {
+        double eachTableMoneyShare = deposit / tables.indexOf(table);
+        for (int i = 0; i < tables.indexOf(table); i++) {
+            Table thisTable = tables.get(i);
+            for (User thisTableUser : thisTable.getUsers()) {
+                thisTableUser.addMoney(eachTableMoneyShare / thisTable.getUsers().size());
+            }
+        }
     }
 }
