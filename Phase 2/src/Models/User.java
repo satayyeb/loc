@@ -7,6 +7,14 @@ public class User {
     private User inviter;
     private int invitationCount;
 
+    public User(String username, double money, Table table, User inviter, int invitationCount) {
+        this.username = username;
+        this.money = money;
+        this.table = table;
+        this.inviter = inviter;
+        this.invitationCount = invitationCount;
+    }
+
     public User(String username, double money, User inviter) {
         this.username = username;
         this.money = money;

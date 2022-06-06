@@ -81,7 +81,7 @@ public class Main {
             return;
         }
         User inviter = Chain.getUserByUsername(commandParts[1]);
-        int deposit = Integer.parseInt(commandParts[5]);
+        double deposit = Integer.parseInt(commandParts[5]);
         User user = new User(username, deposit * 0.20, inviter);
         inviter.addMoney(deposit * 0.05);
         Chain.addMoneyToMahdiz(deposit * 0.15);
@@ -89,7 +89,7 @@ public class Main {
         Table table = Chain.getFirstNotFullTableAfterUser(inviter);
         table.addUser(user);
         ArrayList<Table> tables = Chain.getTables();
-        double eachTableMoneyShare = deposit / tables.indexOf(table);
+        double eachTableMoneyShare = (deposit / 2) / tables.indexOf(table);
         for (int i = 0; i < tables.indexOf(table); i++) {
             Table thisTable = tables.get(i);
             for (User user1 : thisTable.getUsers()) {

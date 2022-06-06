@@ -1,8 +1,6 @@
 package Models;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Chain {
     private static Set<User> users = new HashSet<>();
@@ -79,6 +77,13 @@ public class Chain {
         Table upTable = tables.get(tables.indexOf(user.getTable()) -1);
         if (!upTable.isFull()){
             upTable.addUser(user);
+            return;
         }
+        List<User> sortedUsers = (upTable.getUsers().stream().sorted(Comparator.comparing(User::getInvitationCount).thenComparing(User::getMoney)).toList());
+        User worstUser = sortedUsers.get(sortedUsers.size() -1);
+        User tempWorst = new User(worstUser.getUsername(), worstUser.getMoney(), worstUser.getTable(), worstUser.getInviter(), worstUser.getInvitationCount());
+        User tempGood = new User(user.getUsername(), user.getMoney(), user.getTable(), user.getInviter(), user.getInvitationCount());
+        user.getTable().getUsers().set(user.getTable().getUsers().indexOf(user), tempWorst);
+        worstUser.getTable().getUsers().set(worstUser.getTable().getUsers().indexOf(worstUser), tempGood);
     }
 }
