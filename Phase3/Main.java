@@ -1,13 +1,32 @@
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
-public class Main
-{
-    public static void main(String[] args)
-    {
+public class Main {
+    public static void main(String[] args) throws CsvValidationException, IOException {
+
+        double rate = 1;
+        CSVReader csvReader = new CSVReader(new FileReader("comments.csv"));
+        String[][] dataSet = readFile(csvReader);
+        HashMap<String, WordPossibility> wordsPossibility = calculatePossibility(dataSet, rate);
+
+        //calculate Pz and Po
+        double Pz = 0;
+        for (String[] str : dataSet)
+            if (str[1].equals("0"))
+                Pz++;
+        Pz = Pz / 700;
+        double Po = 1 - Pz;
+
+
+
         Set<Comment> comments = new HashSet<>();
         Set<Comment> commentsTest = new HashSet<>();
         HashMap<String, Word> words = new HashMap<>();
@@ -18,7 +37,6 @@ public class Main
         analyzeWords(comments, words);
 
         printWords(words);
-
 
 
 //
@@ -74,53 +92,110 @@ public class Main
 
     }
 
+    private static String[][] readFile(CSVReader csvReader) throws IOException, CsvValidationException {
+        String[][] dataSet = new String[700][2];
+        for (int i = 0; i < 700; i++) {
+            String[] line = csvReader.readNext();
+            String review = line[0];
+            //remove extra characters
+            review = review.replaceAll("[^A-Za-z0-9]+", " ");
+            //keep important short words
+            review = review.replaceAll("bad", "badddd");
+            //remove words of length less than 4 from string
+            review = review.replaceAll("\\b\\w{1,3}\\b\\s?", "");
+            //remove first space
+            review = review.replaceFirst("^ +", "");
+            dataSet[i][0] = review;
+            dataSet[i][1] = line[1];
+        }
+        return dataSet;
+    }
+
+    private static HashMap<String, WordPossibility> calculatePossibility(String[][] dataSet, double rate) {
+        //serialize all words in a single string
+        StringBuilder wordsSeriesBuilder = new StringBuilder();
+        for (String[] review : dataSet)
+            wordsSeriesBuilder.append(review[0]).append(" ");
+        String wordsSeries = String.valueOf(wordsSeriesBuilder);
+
+        double numberOfWords = wordsSeries.replaceAll("^ ", "").length();
+        HashMap<String, WordPossibility> wordsP = new HashMap<>();
+        for (String word : wordsSeries.split(" ")) {
+            if (wordsP.get(word) == null) {
+                Matcher matcher = Pattern.compile(word).matcher(wordsSeries);
+                int count = 0;
+                while (matcher.find())
+                    count++;
+                Double P = count * rate / numberOfWords;
+
+                double PandO = 0;
+                double PandZ = 0;
+                double numOfOnes = 0;
+                for (String[] comment : dataSet) {
+                    if (comment[1].equals("1")) {
+                        numOfOnes++;
+                        if (comment[0].contains(word))
+                            PandO++;
+                    } else {
+                        if (comment[0].contains(word))
+                            PandZ++;
+                    }
+                }
+                double PconO = PandO / numOfOnes;
+                double PconZ = PandZ / (700 - numOfOnes);
+                PandO = PandO / 700;
+                PandZ = PandZ / 700;
+
+                wordsP.put(word, new WordPossibility(P, PandZ, PandO, PconZ, PconO));
+            }
+        }
+        return wordsP;
+    }
+
     private static void printWords(HashMap<String, Word> words) {
         for (Word value : words.values()) {
             System.out.println(value.getText() +
-                    "\tBad: "+ value.getBadCount() +
-                    "\tGood: " + value.getGoodCount() + " "+
-                    "\tp: " + value.getGoodProb()+
+                    "\tBad: " + value.getBadCount() +
+                    "\tGood: " + value.getGoodCount() + " " +
+                    "\tp: " + value.getGoodProb() +
                     "\tpw: " + value.getgoodProbWeighted() +
                     "\tw: " + value.getWeight());
         }
     }
 
-    public static void readComments(Set<Comment> comments, Set<Comment> commentsTest){
+    public static void readComments(Set<Comment> comments, Set<Comment> commentsTest) {
         String line = "";
-        try
-        {
+        try {
             BufferedReader br = new BufferedReader(new FileReader("comments.csv"));
             int count = 0;
             while ((line = br.readLine()) != null)   //returns a Boolean value
             {
-                String text = line.substring(0,line.length()-1).
+                String text = line.substring(0, line.length() - 1).
                         replaceAll("[\'\",.!?]", "").strip();
-                if (count <= 700){
+                if (count <= 700) {
                     comments.add(new Comment(text, line.charAt(line.length() - 1) == '1'));
-                } else{
+                } else {
 
                     commentsTest.add(new Comment(text, line.charAt(line.length() - 1) == '1'));
                 }
                 count++;
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
 
     }
 
-    public static void analyzeWords(Set<Comment> comments, HashMap<String, Word> words){
+    public static void analyzeWords(Set<Comment> comments, HashMap<String, Word> words) {
         for (Comment comment : comments) {
             for (String word : comment.getComment().split(" ")) {
-                if (!words.containsKey(word)){
+                if (!words.containsKey(word)) {
                     Word word1 = new Word(word);
                     word1.add(comment.getPolarity());
                     words.put(word, word1);
 
-                } else{
+                } else {
                     words.get(word).add(comment.getPolarity());
                 }
             }
