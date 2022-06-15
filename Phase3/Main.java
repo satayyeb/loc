@@ -1,7 +1,6 @@
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -14,7 +13,7 @@ public class Main {
 
         double rate = 1;
         CSVReader csvReader = new CSVReader(new FileReader("comments.csv"));
-        String[][] dataSet = readFile(csvReader);
+        String[][] dataSet = readFile(700, csvReader);
         HashMap<String, WordPossibility> wordsPossibility = calculatePossibility(dataSet, rate);
 
         //calculate Pz and Po
@@ -25,9 +24,19 @@ public class Main {
         Pz = Pz / 700;
         double Po = 1 - Pz;
 
+        //read tests
+        String[][] testSet = readFile(191, csvReader);
+
+
+        //debug:
+        //show the last test
+        System.out.println(testSet[190][0]);
+        System.exit(0);
+
+
         for (String s : wordsPossibility.keySet()) {
             WordPossibility w = wordsPossibility.get(s);
-            System.out.println("word: " + s +"\t"+ w);
+            System.out.println("word: " + s + "\t" + w);
         }
 
 //        Set<Comment> comments = new HashSet<>();
@@ -95,9 +104,9 @@ public class Main {
 
     }
 
-    private static String[][] readFile(CSVReader csvReader) throws IOException, CsvValidationException {
-        String[][] dataSet = new String[700][2];
-        for (int i = 0; i < 700; i++) {
+    private static String[][] readFile(int numOfRead, CSVReader csvReader) throws IOException, CsvValidationException {
+        String[][] dataSet = new String[numOfRead][2];
+        for (int i = 0; i < numOfRead; i++) {
             String[] line = csvReader.readNext();
             String review = line[0];
             //remove extra characters
