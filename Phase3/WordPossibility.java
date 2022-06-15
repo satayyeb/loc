@@ -13,4 +13,14 @@ public class WordPossibility {
         this.PconO = PconO;
     }
 
+    @Override
+    public String toString() {
+        return "WordPossibility{" +
+                "P=" + P +
+                ", PandZ=" + PandZ +
+                ", PandO=" + PandO +
+                ", PconZ=" + PconZ +
+                ", PconO=" + PconO +
+                '}';
+    }
 }

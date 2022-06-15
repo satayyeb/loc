@@ -25,19 +25,22 @@ public class Main {
         Pz = Pz / 700;
         double Po = 1 - Pz;
 
+        for (String s : wordsPossibility.keySet()) {
+            WordPossibility w = wordsPossibility.get(s);
+            System.out.println("word: " + s +"\t"+ w);
+        }
 
-
-        Set<Comment> comments = new HashSet<>();
-        Set<Comment> commentsTest = new HashSet<>();
-        HashMap<String, Word> words = new HashMap<>();
-        SortedMap<Double, Boolean> results = new TreeMap<>();
-
-        readComments(comments, commentsTest);
-
-        analyzeWords(comments, words);
-
-        printWords(words);
-
+//        Set<Comment> comments = new HashSet<>();
+//        Set<Comment> commentsTest = new HashSet<>();
+//        HashMap<String, Word> words = new HashMap<>();
+//        SortedMap<Double, Boolean> results = new TreeMap<>();
+//
+//        readComments(comments, commentsTest);
+//
+//        analyzeWords(comments, words);
+//
+//        printWords(words);
+//
 
 //
 //        for (Comment comment : commentsTest) {
@@ -151,54 +154,55 @@ public class Main {
         }
         return wordsP;
     }
+//
+//    private static void printWords(HashMap<String, Word> words) {
+//        for (Word value : words.values()) {
+//            System.out.println(value.getText() +
+//                    "\tBad: " + value.getBadCount() +
+//                    "\tGood: " + value.getGoodCount() + " " +
+//                    "\tp: " + value.getGoodProb() +
+//                    "\tpw: " + value.getgoodProbWeighted() +
+//                    "\tw: " + value.getWeight());
+//        }
+//    }
+//
+//    public static void readComments(Set<Comment> comments, Set<Comment> commentsTest) {
+//        String line = "";
+//        try {
+//            BufferedReader br = new BufferedReader(new FileReader("comments.csv"));
+//            int count = 0;
+//            while ((line = br.readLine()) != null)   //returns a Boolean value
+//            {
+//                String text = line.substring(0, line.length() - 1).
+//                        replaceAll("[\'\",.!?]", "").strip();
+//                if (count <= 700) {
+//                    comments.add(new Comment(text, line.charAt(line.length() - 1) == '1'));
+//                } else {
+//
+//                    commentsTest.add(new Comment(text, line.charAt(line.length() - 1) == '1'));
+//                }
+//                count++;
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//    }
+//
+//    public static void analyzeWords(Set<Comment> comments, HashMap<String, Word> words) {
+//        for (Comment comment : comments) {
+//            for (String word : comment.getComment().split(" ")) {
+//                if (!words.containsKey(word)) {
+//                    Word word1 = new Word(word);
+//                    word1.add(comment.getPolarity());
+//                    words.put(word, word1);
+//
+//                } else {
+//                    words.get(word).add(comment.getPolarity());
+//                }
+//            }
+//        }
+//    }
 
-    private static void printWords(HashMap<String, Word> words) {
-        for (Word value : words.values()) {
-            System.out.println(value.getText() +
-                    "\tBad: " + value.getBadCount() +
-                    "\tGood: " + value.getGoodCount() + " " +
-                    "\tp: " + value.getGoodProb() +
-                    "\tpw: " + value.getgoodProbWeighted() +
-                    "\tw: " + value.getWeight());
-        }
-    }
-
-    public static void readComments(Set<Comment> comments, Set<Comment> commentsTest) {
-        String line = "";
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("comments.csv"));
-            int count = 0;
-            while ((line = br.readLine()) != null)   //returns a Boolean value
-            {
-                String text = line.substring(0, line.length() - 1).
-                        replaceAll("[\'\",.!?]", "").strip();
-                if (count <= 700) {
-                    comments.add(new Comment(text, line.charAt(line.length() - 1) == '1'));
-                } else {
-
-                    commentsTest.add(new Comment(text, line.charAt(line.length() - 1) == '1'));
-                }
-                count++;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    public static void analyzeWords(Set<Comment> comments, HashMap<String, Word> words) {
-        for (Comment comment : comments) {
-            for (String word : comment.getComment().split(" ")) {
-                if (!words.containsKey(word)) {
-                    Word word1 = new Word(word);
-                    word1.add(comment.getPolarity());
-                    words.put(word, word1);
-
-                } else {
-                    words.get(word).add(comment.getPolarity());
-                }
-            }
-        }
-    }
 }  
