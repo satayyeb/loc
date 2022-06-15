@@ -3,6 +3,7 @@ import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,9 +15,11 @@ public class Main {
         double rate = 1;
         CSVReader csvReader = new CSVReader(new FileReader("comments.csv"));
         String[][] dataSet = readFile(700, csvReader);
-        HashMap<String, WordPossibility> wordsPossibility = calculatePossibility(dataSet, rate);
+        HashMap<String, WordPossibility> wordsPossibility = calculateWordPossibility(dataSet, rate);
 
+        ArrayList<CommentPossibility> commentPossibilities = calculateCommentPossibility(dataSet);
         //calculate Pz and Po
+
         double Pz = 0;
         for (String[] str : dataSet)
             if (str[1].equals("0"))
@@ -26,18 +29,49 @@ public class Main {
 
         //read tests
         String[][] testSet = readFile(191, csvReader);
-
+        ArrayList<CommentPossibility> testCommentPossibilities = calculateCommentPossibility(testSet);
 
         //debug:
         //show the last test
-        System.out.println(testSet[190][0]);
-        System.exit(0);
+//        System.out.println(testSet[190][0]);
+//        System.exit(0);
 
 
         for (String s : wordsPossibility.keySet()) {
-            WordPossibility w = wordsPossibility.get(s);
-            System.out.println("word: " + s + "\t" + w);
+            System.out.println(s + " :" + wordsPossibility.get(s).P);
         }
+
+        for (CommentPossibility commentPossibility : commentPossibilities) {
+            commentPossibility.calculateProbability(wordsPossibility, Pz, Po, 0);
+//            System.out.println(commentPossibility);
+        }
+
+        int rightGuesses = 0;
+        for (CommentPossibility commentPossibility : commentPossibilities) {
+            if (commentPossibility.isPolarity() == commentPossibility.isPredictedPolarity()){
+                rightGuesses++;
+            }
+        }
+        System.out.println("train right Guesses: " +  rightGuesses);
+        System.out.println("train percentage: " + rightGuesses/ 700.0);
+
+
+        double minP = 0.000025;
+        for (CommentPossibility testCommentPossibility : testCommentPossibilities) {
+            testCommentPossibility.calculateProbability(wordsPossibility, Pz, Po, minP);
+        }
+
+        rightGuesses = 0;
+        for (CommentPossibility testCommentPossibility : testCommentPossibilities) {
+            if (testCommentPossibility.isPolarity() == testCommentPossibility.isPredictedPolarity()){
+                rightGuesses++;
+            }
+        }
+        System.out.println("minP: " + minP);
+        System.out.println("test right guesses: " + rightGuesses);
+        System.out.println("test percentage: " + rightGuesses/191.0);
+        minP*=0.9;
+
 
 //        Set<Comment> comments = new HashSet<>();
 //        Set<Comment> commentsTest = new HashSet<>();
@@ -104,6 +138,17 @@ public class Main {
 
     }
 
+
+    private static ArrayList<CommentPossibility> calculateCommentPossibility(String[][] dataSet) {
+
+        ArrayList<CommentPossibility> commentPossibilities = new ArrayList<>();
+        for (String[] strings : dataSet) {
+            commentPossibilities.add(new CommentPossibility(strings[0], strings[1]));
+        }
+
+        return commentPossibilities;
+    }
+
     private static String[][] readFile(int numOfRead, CSVReader csvReader) throws IOException, CsvValidationException {
         String[][] dataSet = new String[numOfRead][2];
         for (int i = 0; i < numOfRead; i++) {
@@ -114,7 +159,7 @@ public class Main {
             //keep important short words
             review = review.replaceAll("bad", "badddd");
             //remove words of length less than 4 from string
-            review = review.replaceAll("\\b\\w{1,3}\\b\\s?", "");
+            review = review.replaceAll("\\b\\w{1,2}\\b\\s?", "");
             //remove first space
             review = review.replaceFirst("^ +", "");
             dataSet[i][0] = review;
@@ -123,7 +168,7 @@ public class Main {
         return dataSet;
     }
 
-    private static HashMap<String, WordPossibility> calculatePossibility(String[][] dataSet, double rate) {
+    private static HashMap<String, WordPossibility> calculateWordPossibility(String[][] dataSet, double rate) {
         //serialize all words in a single string
         StringBuilder wordsSeriesBuilder = new StringBuilder();
         for (String[] review : dataSet)
@@ -138,7 +183,7 @@ public class Main {
                 int count = 0;
                 while (matcher.find())
                     count++;
-                Double P = count * rate / numberOfWords;
+                double P = count * rate / numberOfWords;
 
                 double PandO = 0;
                 double PandZ = 0;
@@ -155,8 +200,8 @@ public class Main {
                 }
                 double PconO = PandO / numOfOnes;
                 double PconZ = PandZ / (700 - numOfOnes);
-                PandO = PandO / 700;
-                PandZ = PandZ / 700;
+                PandO /= 700;
+                PandZ /= 700;
 
                 wordsP.put(word, new WordPossibility(P, PandZ, PandO, PconZ, PconO));
             }
